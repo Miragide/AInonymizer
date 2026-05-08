@@ -1,5 +1,5 @@
 """
-Port Python de src/lib/anonymizer.ts — pipeline d'anonymisation en 4 passes.
+Pipeline d'anonymisation en 4 passes.
 """
 from __future__ import annotations
 

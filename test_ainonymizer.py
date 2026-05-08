@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Tests de régression pour Siegfried Python.
-Exécuter : python test_siegfried.py
+Tests de régression pour AInonymizer.
+Exécuter : python test_ainonymizer.py
 Aucune dépendance externe requise (ne teste pas l'extraction PDF/DOCX).
 """
 import sys
 import traceback
-from pathlib import Path
 
 # Force UTF-8 sur Windows (console CP1252 par défaut)
 if hasattr(sys.stdout, "reconfigure"):
@@ -100,7 +99,6 @@ def test_structured_pii() -> None:
     expect("DATE_NAISSANCE détecté (né le)", "DATE_NAISSANCE" in cats, str(cats))
     expect("ADRESSE détectée", "ADRESSE" in cats, str(cats))
 
-    # L'IBAN doit contenir le bon texte
     ibans = [m for m in matches if m.category == "IBAN"]
     expect("IBAN texte correct", any("FR76" in m.text for m in ibans),
            str([m.text for m in ibans]))
@@ -185,27 +183,17 @@ def test_pipeline() -> None:
     entities = analyze(text, pm)
     anonymized = apply_pseudonyms(text, entities)
 
-    # Les PII doivent avoir disparu
-    expect("Nom DUPONT remplacé", "DUPONT" not in anonymized,
-           anonymized[:200])
-    expect("IBAN remplacé", "FR76 3000" not in anonymized,
-           anonymized[:200])
-    expect("Email remplacé", "jean.dupont@example.com" not in anonymized,
-           anonymized[:200])
-    expect("Date de naissance remplacée", "15/03/1985" not in anonymized,
-           anonymized[:200])
+    expect("Nom DUPONT remplacé", "DUPONT" not in anonymized, anonymized[:200])
+    expect("IBAN remplacé", "FR76 3000" not in anonymized, anonymized[:200])
+    expect("Email remplacé", "jean.dupont@example.com" not in anonymized, anonymized[:200])
+    expect("Date de naissance remplacée", "15/03/1985" not in anonymized, anonymized[:200])
+    expect("Date procédurale conservée", "10/01/2024" in anonymized, anonymized[:300])
 
-    # La date procédurale (audience du) doit rester
-    expect("Date procédurale conservée", "10/01/2024" in anonymized,
-           anonymized[:300])
-
-    # Cohérence : Jean DUPONT apparaît deux fois → même pseudonyme
     enabled = [e for e in entities if e.enabled and "DUPONT" in e.text]
     pseudos = {e.pseudonym for e in enabled}
     expect("Cohérence cross-occurrence DUPONT", len(pseudos) == 1,
            f"pseudonymes distincts : {pseudos}")
 
-    # Les pseudonymes ont le bon format [CATEGORIE_NNN]
     import re
     placeholders = re.findall(r"\[([A-Z_]+_\d{3})\]", anonymized)
     expect("Pseudonymes au format [CAT_NNN] présents", len(placeholders) > 0,
@@ -213,15 +201,14 @@ def test_pipeline() -> None:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  6. Juritools — reclassification dates & propagation
+#  6. Post-traitement — reclassification dates & propagation
 # ═══════════════════════════════════════════════════════════════════════
 
-def test_juritools() -> None:
-    print("\n── Juritools ─────────────────────────────────────────────")
+def test_postprocess() -> None:
+    print("\n── Post-traitement ───────────────────────────────────────")
     from regex_fr import find_structured_pii
     from juritools import propagate_multi_occurrences, reclassify_dates
 
-    # Date de naissance vs date procédurale
     text = "née le 12/05/1990, arrêt du 03/06/2023."
     raw = find_structured_pii(text)
     reclassified = reclassify_dates(text, raw)
@@ -233,7 +220,6 @@ def test_juritools() -> None:
            not any(m.text == "03/06/2023" for m in reclassified),
            str([(m.category, m.text) for m in reclassified]))
 
-    # Propagation
     from regex_fr import RawMatch
     text2 = "Jean DUPONT a signé. Jean DUPONT était présent."
     seed = [RawMatch(start=0, end=11, text="Jean DUPONT", category="PERSONNE")]
@@ -258,13 +244,9 @@ def test_markdown_output() -> None:
     entities = analyze(text, pm)
     anon = apply_pseudonyms(text, entities)
 
-    # Vérifie que les pseudonymes sont bien entre crochets
     pattern = re.compile(r"\[[A-Z_]+_\d{3}\]")
     found = pattern.findall(anon)
-    expect("Pseudonymes entre crochets dans la sortie", len(found) > 0,
-           repr(anon))
-
-    # Vérifie que le nom original n'est plus là
+    expect("Pseudonymes entre crochets dans la sortie", len(found) > 0, repr(anon))
     expect("DUMONT absent de la sortie", "DUMONT" not in anon, repr(anon))
 
     print(f"  → Exemple de sortie : {repr(anon[:120])}")
@@ -275,7 +257,7 @@ def test_markdown_output() -> None:
 # ═══════════════════════════════════════════════════════════════════════
 
 def main() -> None:
-    print("Siegfried -- tests de regression\n" + "=" * 50)
+    print("AInonymizer -- tests de régression\n" + "=" * 50)
 
     suites = [
         test_checksums,
@@ -283,7 +265,7 @@ def main() -> None:
         test_person_names,
         test_pseudo_map,
         test_pipeline,
-        test_juritools,
+        test_postprocess,
         test_markdown_output,
     ]
 
@@ -300,10 +282,10 @@ def main() -> None:
     print(f"  {PASS} passe(s)   {FAIL} echoue(s)")
 
     if FAIL:
-        print("\n  Des corrections sont necessaires avant utilisation.")
+        print("\n  Des corrections sont nécessaires avant utilisation.")
         sys.exit(1)
     else:
-        print("\n  Tous les tests passent -- moteur operationnel.")
+        print("\n  Tous les tests passent — moteur opérationnel.")
         sys.exit(0)
 
 

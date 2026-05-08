@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Siegfried — pseudonymiseur local headless (Python)
+AInonymizer — pseudonymiseur local headless (Python)
 
 Usage :
     Placer ce script dans le dossier contenant vos fichiers PDF/DOCX/MD,
     puis exécuter :
         pip install -r requirements.txt
-        python siegfried.py
+        python ainonymizer.py
 
 Sortie : dossier output/ créé à côté du script.
   • {nom}_anonymise.md   — texte pseudonymisé (optimisé LLM)
@@ -131,6 +131,7 @@ def main() -> None:
         root = Path(sys.executable).parent.resolve()
     else:
         root = Path(__file__).parent.resolve()
+
     output_dir = root / "output"
     output_dir.mkdir(exist_ok=True)
 
@@ -139,7 +140,7 @@ def main() -> None:
         print("Aucun fichier PDF / DOCX / MD trouvé à la racine du script.")
         sys.exit(0)
 
-    print(f"Siegfried — {len(docs)} fichier(s) trouvé(s)\n")
+    print(f"AInonymizer — {len(docs)} fichier(s) trouvé(s)\n")
 
     # PseudoMap partagée : garantit la cohérence cross-document
     pseudo_map = PseudoMap()

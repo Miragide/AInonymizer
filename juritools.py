@@ -1,6 +1,5 @@
 """
-Port Python de src/lib/juritools.ts — post-traitement déterministe
-inspiré du package juritools de la Cour de cassation.
+Post-traitements déterministes sur les entités détectées.
 """
 from __future__ import annotations
 

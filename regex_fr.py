@@ -1,5 +1,5 @@
 """
-Port Python de src/lib/regex-fr.ts — détection PII française.
+Détection de données personnelles (PII) en français.
 Catégories : EMAIL, TEL, NIR, IBAN, SIREN, PLAQUE, NUM_DOSSIER,
              DATE, DATE_NAISSANCE, ADRESSE, JURIDICTION, PERSONNE_MORALE,
              AVOCAT, MAGISTRAT, PERSONNE, LIEU.
