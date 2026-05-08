@@ -61,13 +61,17 @@ Documents pseudonymisés  ──→  LLM (ChatGPT, Claude…)  ──→  Résul
 
 Téléchargez `ainonymizer.exe` depuis la page [Releases](../../releases), placez-le dans le dossier contenant vos fichiers et double-cliquez.
 
-### Option B — Python
+> L'exe est compilé pour **Windows 10/11 64-bit** uniquement.
+
+### Option B — Python (Windows, Linux, macOS)
 
 **Prérequis** : Python 3.10+
 
 ```bash
 pip install -r requirements.txt
 ```
+
+Toutes les dépendances (`pymupdf`, `python-docx`, `rapidfuzz`) disposent de wheels Linux et macOS sur PyPI — aucune compilation requise.
 
 ## Utilisation
 
