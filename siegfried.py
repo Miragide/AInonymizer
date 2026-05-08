@@ -127,7 +127,10 @@ def process(path: Path, pseudo_map: PseudoMap, output_dir: Path) -> dict[str, st
 # ═══════════════════════════════════════════════════════════════════════
 
 def main() -> None:
-    root = Path(__file__).parent.resolve()
+    if getattr(sys, "frozen", False):
+        root = Path(sys.executable).parent.resolve()
+    else:
+        root = Path(__file__).parent.resolve()
     output_dir = root / "output"
     output_dir.mkdir(exist_ok=True)
 
