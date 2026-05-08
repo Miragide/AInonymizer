@@ -29,6 +29,7 @@ from extractor import extract
 from pseudo_map import PseudoMap
 
 SUPPORTED = {".pdf", ".docx", ".md", ".markdown"}
+_IGNORED = {"readme.md", "readme.markdown", "claude.md"}
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -36,12 +37,13 @@ SUPPORTED = {".pdf", ".docx", ".md", ".markdown"}
 # ═══════════════════════════════════════════════════════════════════════
 
 def find_documents(root: Path) -> list[Path]:
-    """Liste les fichiers supportés à la racine du script (hors output/)."""
+    """Liste les fichiers supportés à la racine du script (hors output/ et fichiers meta)."""
     output_dir = root / "output"
     return sorted(
         p for p in root.iterdir()
         if p.is_file()
         and p.suffix.lower() in SUPPORTED
+        and p.name.lower() not in _IGNORED
         and p.parent != output_dir
     )
 
