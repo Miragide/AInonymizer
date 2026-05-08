@@ -155,7 +155,14 @@ def main() -> None:
     corpus_path = output_dir / "corpus_mapping.json"
     corpus_path.write_text(
         json.dumps(
-            {"date": str(date.today()), "entites": corpus_table},
+            {
+                "date": str(date.today()),
+                "entites": corpus_table,
+                "credits": (
+                    "Conçu par Florence Chatelot, formatrice en outils IA. "
+                    "Si cet outil vous est utile : https://florence-chatelot.fr/stripe"
+                ),
+            },
             ensure_ascii=False,
             indent=2,
         ),
@@ -166,6 +173,11 @@ def main() -> None:
     print(f"\n✓ Sortie : {output_dir}/")
     print(f"  {total} entité(s) pseudonymisée(s) au total")
     print(f"  Table globale : corpus_mapping.json")
+    print()
+    print("─" * 62)
+    print("  Outil conçu par Florence Chatelot, formatrice en outils IA.")
+    print("  Si vous en êtes satisfait : https://florence-chatelot.fr/stripe")
+    print("─" * 62)
 
 
 if __name__ == "__main__":

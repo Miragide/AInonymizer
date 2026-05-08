@@ -142,3 +142,13 @@ extractor.py      — extraction texte (PDF via MuPDF, DOCX via python-docx)
 - PDF scannés (images) non supportés — le texte doit être sélectionnable
 - Détection basée sur des règles (pas de ML) : peut produire des faux positifs sur des termes ambigus
 - Optimisé pour les textes en français
+
+---
+
+## À propos
+
+Je suis **Florence Chatelot**, formatrice en outils d'IA, déterminée à rendre l'intelligence artificielle plus simple et accessible pour tous. AInonymizer est né de longues heures d'échange avec Claude AI, avec une conviction simple : les entreprises ne devraient pas avoir à choisir entre travailler avec l'IA et respecter le RGPD.
+
+Si cet outil vous fait gagner du temps, vous pouvez soutenir son évolution. Cela m'aidera à le maintenir, à l'améliorer, et à concevoir de nouveaux outils pratiques.
+
+**[Soutenir ce projet](https://florence-chatelot.fr/stripe)**
