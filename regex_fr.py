@@ -252,6 +252,8 @@ _STOPWORDS: set[str] = {
     "ARTICLE", "CODE", "CIVIL", "PENAL", "PROCEDURE", "TRAVAIL", "COMMERCE",
     "PREMIER", "DEUXIEME", "TROISIEME",
     "TITRE", "CHAPITRE", "SECTION", "ALINEA", "PARAGRAPHE",
+    "LOI", "DECRET", "ARRETE", "TEXTE", "DROIT", "FAIT", "FAITS",
+    "OBJET", "EXPOSE", "MOTIF", "MOTIFS", "DISPOSITIF", "FOND",
 } | set(_FORMES)
 
 
@@ -302,6 +304,14 @@ _NAME_PATTERNS: list[re.Pattern] = [
     re.compile(r"(?:" + ctx + r")\s+(" + _NOM_PART + r")")
     for ctx in _CONTEXTES
 ]
+# NOM (tout en majuscules, éventuellement composé avec tiret) suivi d'un Prénom
+# Ex. : "PERROT Claudine", "MARTIN-DUPONT Marie-France"
+_NOM_MAJUSCULES_RE = re.compile(
+    r"\b([A-ZÀ-ÖØ-ÞŸ]{2,}(?:-[A-ZÀ-ÖØ-ÞŸ]{2,})*)"
+    r"\s+"
+    r"([A-ZÀ-ÖØ-ÞŸ][a-zà-ÿ']{1,}(?:-[A-ZÀ-ÖØ-ÞŸ][a-zà-ÿ']{1,})*"
+    r"(?:\s+[A-ZÀ-ÖØ-ÞŸ][a-zà-ÿ']{1,}(?:-[A-ZÀ-ÖØ-ÞŸ][a-zà-ÿ']{1,})*)?)"
+)
 _ENTRE_RE = re.compile(
     r"\b(?:ENTRE|Entre)\s*:?\s*\n?\s*"
     r"((?:[A-ZÀ-ÖØ-ÞŸ][a-zà-ÿ'\-]+\s+)*[A-ZÀ-ÖØ-ÞŸ][A-ZÀ-ÖØ-ÞŸ'\-]+)"
@@ -350,7 +360,19 @@ def find_person_names(text: str) -> list[RawMatch]:
             continue
         out.append(RawMatch(start=m.start(1), end=m.end(1), text=name, category="PERSONNE"))
 
-    # 3. Séquences Prénom NOM (majuscule mixte)
+    # 3. NOM (majuscules) Prénom (titre) — ex. "PERROT Claudine"
+    for m in _NOM_MAJUSCULES_RE.finditer(text):
+        nom, prenom = m.group(1), m.group(2)
+        if _is_stopword(nom):
+            continue
+        if _strip_accents(prenom.split()[0]) in _NOT_FIRSTNAME:
+            continue
+        full = m.group(0)
+        if len(full.strip()) < 5:
+            continue
+        out.append(RawMatch(start=m.start(), end=m.end(), text=full, category="PERSONNE"))
+
+    # 4. Séquences Prénom NOM (majuscule mixte)
     for m in _FULLCAPS_RE.finditer(text):
         name = m.group(1)
         if not name or len(name.strip()) < 4 or _is_stopword(name):

@@ -135,6 +135,23 @@ def test_person_names() -> None:
     expect("Sophie DURAND détectée comme AVOCAT", any("DURAND" in t for t in avocat_texts),
            str(avocat_texts))
 
+    # Pattern NOM (majuscules) Prénom (titre)
+    text2 = (
+        "PERROT Claudine a déclaré. "
+        "MARTIN-DUPONT Marie-France était présente. "
+        "CHAMBRE Civile — ARTICLE Premier."
+    )
+    persons2 = find_person_names(text2)
+    texts2 = [m.text for m in persons2]
+    expect("PERROT Claudine détecté",
+           any("PERROT" in t for t in texts2), str(texts2))
+    expect("MARTIN-DUPONT Marie-France détecté",
+           any("MARTIN-DUPONT" in t for t in texts2), str(texts2))
+    expect("CHAMBRE Civile non détecté (stopword)",
+           not any(m.text == "CHAMBRE Civile" for m in persons2), str(texts2))
+    expect("ARTICLE Premier non détecté (stopword)",
+           not any(m.text == "ARTICLE Premier" for m in persons2), str(texts2))
+
 
 # ═══════════════════════════════════════════════════════════════════════
 #  4. PseudoMap — cohérence cross-document

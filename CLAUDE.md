@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Run tests (no external dependencies beyond the project's own)
 python test_ainonymizer.py
 
-# Run AInonymizer on all PDF/DOCX/MD files in the current directory
+# Run AInonymizer on all PDF/DOCX/MD files in input/
 python ainonymizer.py
 
 # Install dependencies
@@ -35,8 +35,9 @@ Four passes in sequence:
 
 - **`PseudoMap`** is shared across all documents in a run, guaranteeing cross-document consistency (same entity → same pseudonym).
 - Avocats and magistrats are detected but **disabled by default** (`enabled=False`) per CNIL deliberation 01-057 — they appear in the mapping JSON but are not replaced in the output text.
-- `ainonymizer.py` scans only the script's own directory for input files (not recursively), excluding `output/`. When bundled with PyInstaller (`sys.frozen`), it uses `sys.executable` to locate that directory instead of `__file__`.
+- `ainonymizer.py` scans the `input/` subdirectory for files to process (non-recursive). When bundled with PyInstaller (`sys.frozen`), it uses `sys.executable` to locate the root directory instead of `__file__`. Both `input/` and `output/` are gitignored (content only) — they may contain real PII.
 - The `output/` directory is gitignored — it may contain real PII from production use.
+- The `input/` directory is gitignored (contents only, `.gitkeep` tracked) — drop documents to process there.
 
 ### Module responsibilities
 

@@ -3,7 +3,7 @@
 AInonymizer — pseudonymiseur local headless (Python)
 
 Usage :
-    Placer ce script dans le dossier contenant vos fichiers PDF/DOCX/MD,
+    Placer vos fichiers PDF/DOCX/MD dans le dossier input/,
     puis exécuter :
         pip install -r requirements.txt
         python ainonymizer.py
@@ -36,15 +36,15 @@ _IGNORED = {"readme.md", "readme.markdown", "claude.md"}
 #  Découverte des fichiers
 # ═══════════════════════════════════════════════════════════════════════
 
-def find_documents(root: Path) -> list[Path]:
-    """Liste les fichiers supportés à la racine du script (hors output/ et fichiers meta)."""
-    output_dir = root / "output"
+def find_documents(input_dir: Path) -> list[Path]:
+    """Liste les fichiers supportés dans input/ (hors fichiers meta)."""
+    if not input_dir.exists():
+        return []
     return sorted(
-        p for p in root.iterdir()
+        p for p in input_dir.iterdir()
         if p.is_file()
         and p.suffix.lower() in SUPPORTED
         and p.name.lower() not in _IGNORED
-        and p.parent != output_dir
     )
 
 
@@ -134,12 +134,14 @@ def main() -> None:
     else:
         root = Path(__file__).parent.resolve()
 
+    input_dir = root / "input"
+    input_dir.mkdir(exist_ok=True)
     output_dir = root / "output"
     output_dir.mkdir(exist_ok=True)
 
-    docs = find_documents(root)
+    docs = find_documents(input_dir)
     if not docs:
-        print("Aucun fichier PDF / DOCX / MD trouvé à la racine du script.")
+        print("Aucun fichier PDF / DOCX / MD trouvé dans le dossier input/.")
         sys.exit(0)
 
     print(f"AInonymizer — {len(docs)} fichier(s) trouvé(s)\n")
