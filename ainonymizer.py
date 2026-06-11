@@ -26,6 +26,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from anonymizer import Entity, analyze, apply_pseudonyms
 from extractor import extract
+from gui import launch_gui
 from pseudo_map import PseudoMap
 
 SUPPORTED = {".pdf", ".docx", ".md", ".markdown"}
@@ -79,7 +80,13 @@ def _stats(entities: list[Entity]) -> str:
     return f"{len(enabled)} entités ({summary})"
 
 
-def process(path: Path, pseudo_map: PseudoMap, output_dir: Path) -> dict[str, str]:
+def process(
+    path: Path,
+    pseudo_map: PseudoMap,
+    output_dir: Path,
+    mappings_dir: Path,
+    disabled_categories: frozenset[str] = frozenset(),
+) -> dict[str, str]:
     """
     Extrait, analyse et pseudonymise un fichier.
     Écrit les fichiers de sortie.
@@ -98,13 +105,16 @@ def process(path: Path, pseudo_map: PseudoMap, output_dir: Path) -> dict[str, st
         return {}
 
     entities = analyze(text, pseudo_map)
+    for e in entities:
+        if e.category in disabled_categories:
+            e.enabled = False
     print(f"    {_stats(entities)}")
 
     anonymized = apply_pseudonyms(text, entities)
 
     stem = path.stem
     md_path = output_dir / f"{stem}_anonymise.md"
-    mapping_path = output_dir / f"{stem}_mapping.json"
+    mapping_path = mappings_dir / f"{stem}_mapping.json"
 
     md_path.write_text(_to_markdown(path.name, anonymized), encoding="utf-8")
 
@@ -138,8 +148,13 @@ def main() -> None:
     input_dir.mkdir(exist_ok=True)
     output_dir = root / "output"
     output_dir.mkdir(exist_ok=True)
+    mappings_dir = output_dir / "mappings"
+    mappings_dir.mkdir(exist_ok=True)
 
     docs = find_documents(input_dir)
+
+    disabled_categories = launch_gui(len(docs))
+
     if not docs:
         print("Aucun fichier PDF / DOCX / MD trouvé dans le dossier input/.")
         sys.exit(0)
@@ -151,18 +166,18 @@ def main() -> None:
     corpus_table: dict[str, str] = {}
 
     for path in docs:
-        file_table = process(path, pseudo_map, output_dir)
+        file_table = process(path, pseudo_map, output_dir, mappings_dir, disabled_categories)
         corpus_table.update(file_table)
 
-    corpus_path = output_dir / "corpus_mapping.json"
+    corpus_path = mappings_dir / "corpus_mapping.json"
     corpus_path.write_text(
         json.dumps(
             {
                 "date": str(date.today()),
                 "entites": corpus_table,
                 "credits": (
-                    "Conçu par Florence Chatelot, formatrice en outils IA. "
-                    "Si cet outil vous est utile : https://florence-chatelot.fr/stripe"
+                    "Conçu gratuitement par Florence Chatelot, formatrice aux outils IA. "
+                    "Si cet outil vous est utile, offrez lui quelque chose : https://florence-chatelot.fr/stripe"
                 ),
             },
             ensure_ascii=False,
@@ -174,11 +189,11 @@ def main() -> None:
     total = len(corpus_table)
     print(f"\n✓ Sortie : {output_dir}/")
     print(f"  {total} entité(s) pseudonymisée(s) au total")
-    print(f"  Table globale : corpus_mapping.json")
+    print(f"  Table globale : mappings/corpus_mapping.json")
     print()
     print("─" * 62)
     print("  Outil conçu par Florence Chatelot, formatrice en outils IA.")
-    print("  Si vous en êtes satisfait : https://florence-chatelot.fr/stripe")
+    print("  Offrez-lui un café : https://florence-chatelot.fr/stripe")
     print("─" * 62)
 
 

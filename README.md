@@ -75,7 +75,7 @@ Toutes les dépendances (`pymupdf`, `python-docx`, `rapidfuzz`) disposent de whe
 
 ## Utilisation
 
-1. Placez vos fichiers **PDF, DOCX ou MD** dans le même dossier que `ainonymizer.py` (ou `ainonymizer.exe`)
+1. Placez vos fichiers **PDF, DOCX ou MD** dans le sous-dossier `input/`
 2. Lancez :
 
 ```bash
@@ -86,14 +86,25 @@ python ainonymizer.py
 ainonymizer.exe
 ```
 
-3. Récupérez les fichiers anonymisés dans le sous-dossier `output/` :
+3. Une fenêtre s'ouvre : sélectionnez les catégories à anonymiser, puis cliquez sur **Lancer**
+
+4. Récupérez les fichiers anonymisés dans le sous-dossier `output/` :
 
 ```
 output/
-  rapport_client_anonymise.md    ← texte pseudonymisé, prêt pour le LLM
-  rapport_client_mapping.json    ← table pseudonyme → valeur originale
-  corpus_mapping.json            ← table globale du corpus
+  rapport_client_anonymise.md       ← texte pseudonymisé, prêt pour le LLM
+  mappings/
+    rapport_client_mapping.json     ← table pseudonyme → valeur originale
+    corpus_mapping.json             ← table globale du corpus
 ```
+
+### Interface de sélection
+
+Au lancement, une fenêtre vous permet de choisir quelles catégories anonymiser :
+
+- Toutes les catégories sont cochées par défaut (sauf avocats et magistrats, conformité CNIL)
+- Boutons **Tout cocher / Tout décocher** pour aller vite
+- Cliquez **Annuler** ou fermez la fenêtre pour interrompre sans traiter
 
 ### Exemple de sortie console
 
@@ -107,7 +118,7 @@ AInonymizer — 2 fichier(s) trouvé(s)
 
 ✓ Sortie : output/
   17 entité(s) pseudonymisée(s) au total
-  Table globale : corpus_mapping.json
+  Table globale : mappings/corpus_mapping.json
 ```
 
 ### Exemple de texte pseudonymisé
@@ -128,6 +139,7 @@ python test_ainonymizer.py
 
 ```
 ainonymizer.py    — point d'entrée : découverte fichiers, orchestration, sortie MD + JSON
+gui.py            — interface tkinter de sélection des catégories (lancée au démarrage)
 anonymizer.py     — pipeline 4 passes (détection → post-traitement → déduplication → pseudonymisation)
 regex_fr.py       — patterns regex + checksums (IBAN, NIR, SIREN) pour le français
 juritools.py      — post-traitements déterministes (propagation, variantes, reclassification dates)
